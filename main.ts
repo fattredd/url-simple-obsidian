@@ -24,7 +24,7 @@ interface UrlProcessingResult {
 interface TitleFetchResult {
 	title: string;
 	success: boolean;
-	source: "direct" | "linkpreview" | "failed";
+	source: "direct" | "default" | "failed";
 }
 
 // ==================== MAIN PLUGIN CLASS ====================
@@ -34,10 +34,8 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 	private platformRules: PlatformRule[] = [];
 
 	async onload(): Promise<void> {
-		console.log("Loading Smart URL Cleaner");
-
 		// Initialize platform rules
-		this.initializePlatformRules();
+		this.platformRules = AllPlatformRules;
 
 		// Load settings
 		await this.loadSettings();
@@ -62,8 +60,9 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 			hotkeys: [{ modifiers: ["Mod", "Shift"], key: "v" }],
 			editorCallback: async (editor: Editor) => {
 				await this.handleCommandPaste(editor, {
-					skipFormatting: false,
+					skipShortening: false,
 					skipTracking: false,
+					skipFormatting: false,
 				});
 			},
 		});
@@ -74,8 +73,9 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 			name: "Paste and URL from Clipboard without Processing",
 			editorCallback: async (editor: Editor) => {
 				await this.handleCommandPaste(editor, {
-					skipFormatting: true,
+					skipShortening: true,
 					skipTracking: true,
+					skipFormatting: true,
 				});
 			},
 		});
@@ -93,57 +93,37 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		new Notice("Smart URL Cleaner loaded!");
 	}
 
-	private initializePlatformRules(): void {
-		this.platformRules = AllPlatformRules;
-	}
-
 	private async handlePasteEvent(
 		evt: ClipboardEvent,
 		editor: Editor
 	): Promise<void> {
-		if (!this.settings.enableForAllPastes) return;
-
-		const clipboardText = evt.clipboardData?.getData("text/plain");
-		if (!clipboardText) return;
-
-		const trimmedText = clipboardText.trim();
-		if (!this.isValidUrl(trimmedText)) return;
-
+		if (
+			!this.settings.enableShorteningAllPastes &&
+			!this.settings.enableTrackerStrippingAllPastes &&
+			!this.settings.enableFormattingAllPastes
+		)
+			return;
 		evt.preventDefault();
 
-		try {
-			const cursor = editor.getCursor();
-			const processingText = "[Processing URL...]";
-			editor.replaceRange(processingText, cursor);
-
-			const result = await this.processUrl(trimmedText);
-
-			if (!result.skipped) {
-				const line = editor.getLine(cursor.line);
-				const updatedLine = line.replace(
-					processingText,
-					result.markdownOutput
-				);
-				editor.setLine(cursor.line, updatedLine);
-				editor.setCursor({
-					line: cursor.line,
-					ch: cursor.ch + result.markdownOutput.length,
-				});
-			} else {
-				const line = editor.getLine(cursor.line);
-				const updatedLine = line.replace(processingText, "");
-				editor.setLine(cursor.line, updatedLine);
-				editor.setCursor(cursor);
-			}
-		} catch (error) {
-			console.error("Smart URL Cleaner processing failed:", error);
-			editor.replaceRange(trimmedText, editor.getCursor());
+		const selection = editor.getSelection();
+		if (selection) {
+			editor.replaceSelection("");
 		}
+
+		await this.handleCommandPaste(editor, {
+			skipShortening: !this.settings.enableShorteningAllPastes,
+			skipTracking: !this.settings.enableTrackerStrippingAllPastes,
+			skipFormatting: !this.settings.enableFormattingAllPastes,
+		});
 	}
 
 	private async handleCommandPaste(
 		editor: Editor,
-		options: { skipFormatting: boolean; skipTracking: boolean }
+		options: {
+			skipShortening: boolean;
+			skipTracking: boolean;
+			skipFormatting: boolean;
+		}
 	): Promise<void> {
 		try {
 			// Read from clipboard
@@ -157,7 +137,6 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 
 			const trimmedText = clipboardText.trim();
 			if (!this.isValidUrl(trimmedText)) {
-				new Notice("Not a valid url");
 				const clipboardString = clipboardText.toString();
 				editor.replaceRange(clipboardString, cursor);
 				editor.setCursor({
@@ -172,7 +151,6 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 
 			// Process with command-specific overrides
 			const result = await this.processUrl(trimmedText, options);
-			console.log("result", result);
 
 			const line = editor.getLine(cursor.line);
 			const updatedLine = line.replace(
@@ -184,10 +162,8 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 				line: cursor.line,
 				ch: cursor.ch + result.markdownOutput.length,
 			});
-
-		} catch (error) {
-			console.error("Command paste failed:", error);
-			new Notice("Failed to paste URL");
+		} catch {
+			// eslint-disable-next-line no-empty
 		}
 	}
 
@@ -252,9 +228,9 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		let hasTrackers = false;
 		url.searchParams.forEach((value, key) => {
 			const lowerKey = key.toLowerCase();
-			const isTrackingParam = allTrackingParams.some((tp) =>
-				lowerKey.includes(tp.toLowerCase())
-			);
+			const isTrackingParam = allTrackingParams.some((tp) => {
+				return lowerKey === tp.toLowerCase();
+			});
 			const isEssential = essential_parameters.includes(lowerKey);
 
 			if (isTrackingParam && !isEssential) {
@@ -280,22 +256,24 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 
 	private async processUrl(
 		originalUrl: string,
-		commandOverrides?: { skipFormatting: boolean; skipTracking: boolean }
+		commandOverrides?: {
+			skipShortening: boolean;
+			skipTracking: boolean;
+			skipFormatting: boolean;
+		}
 	): Promise<UrlProcessingResult> {
-
-		let fetchTitle = commandOverrides?.skipFormatting
-			? false
-			: this.settings.fetchTitle;
-		let stripTrackers = commandOverrides?.skipTracking
-			? false
-			: this.settings.stripTrackers;
-		let shortenUrls = commandOverrides?.skipFormatting
+		const shortenUrls = commandOverrides?.skipShortening
 			? false
 			: this.settings.shortenUrls;
+		const stripTrackers = commandOverrides?.skipTracking
+			? false
+			: this.settings.stripTrackers;
+		const autoFormat = commandOverrides?.skipFormatting
+			? false
+			: this.settings.autoFormat;
 
 		const processingPromise = (async (): Promise<UrlProcessingResult> => {
 			try {
-				console.log(`Processing URL: ${originalUrl}`);
 				const url = new URL(originalUrl);
 
 				// === EARLY RETURN CHECKS ===
@@ -303,13 +281,13 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 				const needsShortening =
 					shortenUrls && this.wouldShortenUrl(url);
 
-				// Check 2: Does it need auto-formatting?
-				const needsAutoFormat =
-					fetchTitle && this.shouldAutoFormat(url.hostname);
-
-				// Check 3: Does it have trackers?
+				// Check 2: Does it have trackers?
 				const hasTrackers =
 					stripTrackers && this.hasTrackingParameters(url);
+
+				// Check 3: Does it need auto-formatting?
+				const needsAutoFormat =
+					autoFormat && this.shouldAutoFormat(url.hostname);
 
 				// EARLY RETURN: If none of the above apply, return original
 				if (!needsShortening && !needsAutoFormat && !hasTrackers) {
@@ -351,14 +329,6 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 					if (!linkText || linkText.trim() === "") {
 						const finalUrlObj = new URL(finalUrl);
 						linkText = finalUrlObj.hostname.replace("www.", "");
-					}
-
-					if (linkText.length > this.settings.titleMaxLength) {
-						linkText =
-							linkText.substring(
-								0,
-								this.settings.titleMaxLength
-							) + "...";
 					}
 
 					markdownOutput = `[${linkText}](${finalUrl})`;
@@ -412,7 +382,7 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		newUrl.searchParams.forEach((value, key) => {
 			const lowerKey = key.toLowerCase();
 			const isTrackingParam = allTrackingParams.some((tp) => {
-				lowerKey === tp.toLowerCase();
+				return lowerKey == tp.toLowerCase();
 			});
 			const isEssential = essential_parameters.includes(lowerKey);
 
@@ -461,80 +431,13 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 
 	private async fetchPageTitle(url: string): Promise<TitleFetchResult> {
 		// Don't fetch titles for local files or if disabled
-		if (url.startsWith("file://") || !this.settings.fetchTitle) {
+		if (url.startsWith("file://") || !this.settings.autoFormat) {
 			return { title: "", success: false, source: "failed" };
 		}
 
-		// direct fetching
-		try {
-			const title = await this.fetchTitleDirect(url);
-			return { title, success: !!title, source: "direct" };
-		} catch (error) {
-			console.warn("Direct title fetch failed:", error);
-			return { title: "", success: false, source: "failed" };
-		}
-	}
+		return { title: "", success: true, source: "default" };
 
-	private async fetchTitleDirect(url: string): Promise<string> {
-		const controller = new AbortController();
-		const timeoutId = setTimeout(
-			() => controller.abort(),
-			this.settings.requestTimeout
-		);
-
-		try {
-			const response = await fetch(url, {
-				signal: controller.signal,
-				headers: {
-					"User-Agent":
-						"Mozilla/5.0 (compatible; Obsidian-Smart-URL-Cleaner/1.0; +https://obsidian.md)",
-					Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-					"Accept-Language": "en-US,en;q=0.5",
-					"Accept-Encoding": "gzip, deflate, br",
-					Connection: "keep-alive",
-					"Upgrade-Insecure-Requests": "1",
-				},
-			});
-
-			clearTimeout(timeoutId);
-
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}`);
-			}
-
-			const html = await response.text();
-
-			// Try multiple methods to extract title
-			const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-			if (titleMatch && titleMatch[1]) {
-				let title = titleMatch[1].trim();
-
-				// Clean up common patterns
-				title = this.cleanTitle(title);
-
-				// Truncate if too long
-				if (title.length > this.settings.titleMaxLength) {
-					title =
-						title.substring(0, this.settings.titleMaxLength) +
-						"...";
-				}
-
-				return title;
-			}
-
-			// Alternative: look for OpenGraph title
-			const ogTitleMatch = html.match(
-				/<meta[^>]*property="og:title"[^>]*content="([^"]+)"[^>]*>/i
-			);
-			if (ogTitleMatch && ogTitleMatch[1]) {
-				return this.cleanTitle(ogTitleMatch[1]);
-			}
-
-			return "";
-		} catch (error) {
-			clearTimeout(timeoutId);
-			throw error;
-		}
+		// TODO: direct fetching
 	}
 
 	private cleanTitle(title: string): string {

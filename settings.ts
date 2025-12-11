@@ -3,26 +3,26 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import SmartUrlCleanerPlugin from "main";
 
 export interface SmartUrlCleanerSettings {
-	fetchTitle: boolean;
+	autoFormat: boolean;
 	stripTrackers: boolean;
 	shortenUrls: boolean;
 	customTrackingParams: string;
-	enableForAllPastes: boolean;
-	requestTimeout: number;
-	titleMaxLength: number;
+	enableShorteningAllPastes: boolean;
+	enableTrackerStrippingAllPastes: boolean;
+	enableFormattingAllPastes: boolean;
 	autoFormatDomains: string;
 }
 
 export const DEFAULT_SETTINGS: SmartUrlCleanerSettings = {
-	fetchTitle: true,
+	autoFormat: true,
 	stripTrackers: true,
 	shortenUrls: true,
 	customTrackingParams: "",
-	enableForAllPastes: true,
-	requestTimeout: 5000,
-	titleMaxLength: 100,
+	enableShorteningAllPastes: true,
+	enableTrackerStrippingAllPastes: false,
+	enableFormattingAllPastes: false,
 	autoFormatDomains:
-		"youtube.com,youtu.be,amazon.,x.com,twitter.com,reddit.com",
+		"youtube.com, youtu.be, amazon., x.com, twitter.com, reddit.com",
 };
 
 export class SmartUrlCleanerSettingTab extends PluginSettingTab {
@@ -37,29 +37,61 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Smart URL Cleaner Settings" });
+		new Setting(containerEl).setName("Smart URL Cleaner Settings").setHeading();
 
-		// Basic Settings
+		new Setting(containerEl).setName("Default Paste Override Options").setHeading();
+
 		new Setting(containerEl)
-			.setName("Enable for all pastes")
-			.setDesc("Automatically process URLs when pasted into editor")
+			.setName("Enable Shortening for all pastes")
+			.setDesc("Automatically shorten URLs when pasted into editor")
 			.addToggle((toggle) =>
 				toggle
-					.setValue(this.plugin.settings.enableForAllPastes)
+					.setValue(this.plugin.settings.enableShorteningAllPastes)
 					.onChange(async (value) => {
-						this.plugin.settings.enableForAllPastes = value;
+						this.plugin.settings.enableShorteningAllPastes = value;
 						await this.plugin.saveSettings();
 					})
 			);
 
 		new Setting(containerEl)
-			.setName("Fetch page titles")
-			.setDesc("Automatically fetch and insert page titles as link text")
+			.setName("Enable tracker stripping for all pastes")
+			.setDesc(
+				"Automatically strip tracking from URLs when pasted into editor"
+			)
 			.addToggle((toggle) =>
 				toggle
-					.setValue(this.plugin.settings.fetchTitle)
+					.setValue(
+						this.plugin.settings.enableTrackerStrippingAllPastes
+					)
 					.onChange(async (value) => {
-						this.plugin.settings.fetchTitle = value;
+						this.plugin.settings.enableTrackerStrippingAllPastes =
+							value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Enable formatting for all pastes")
+			.setDesc("Automatically format select URLs when pasted into editor")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.enableFormattingAllPastes)
+					.onChange(async (value) => {
+						this.plugin.settings.enableFormattingAllPastes = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl).setName("Global Command Options").setHeading();
+
+		new Setting(containerEl)
+			.setName("Shorten known URLs")
+			.setDesc("Convert YouTube, Amazon, etc. to their short forms")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.shortenUrls)
+					.onChange(async (value) => {
+						this.plugin.settings.shortenUrls = value;
 						await this.plugin.saveSettings();
 					})
 			);
@@ -78,70 +110,8 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl)
-			.setName("Shorten known URLs")
-			.setDesc("Convert YouTube, Amazon, etc. to their short forms")
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.shortenUrls)
-					.onChange(async (value) => {
-						this.plugin.settings.shortenUrls = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Auto-format domains")
-			.setDesc(
-				'Comma-separated list of domains to auto-format as Markdown links (e.g., "youtube.com,amazon."). Other domains will only have trackers stripped.'
-			)
-			.addTextArea((text) =>
-				text
-					.setPlaceholder("youtube.com,youtu.be,amazon.,x.com")
-					.setValue(this.plugin.settings.autoFormatDomains)
-					.onChange(async (value) => {
-						this.plugin.settings.autoFormatDomains = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		// Title Fetching Settings
-		containerEl.createEl("h3", { text: "Title Fetching Options" });
-
-		new Setting(containerEl)
-			.setName("Request timeout (ms)")
-			.setDesc("Maximum time to wait for title fetching (milliseconds)")
-			.addText((text) =>
-				text
-					.setPlaceholder("5000")
-					.setValue(this.plugin.settings.requestTimeout.toString())
-					.onChange(async (value) => {
-						const numValue = parseInt(value);
-						if (!isNaN(numValue) && numValue > 0) {
-							this.plugin.settings.requestTimeout = numValue;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Maximum title length")
-			.setDesc("Truncate titles longer than this number of characters")
-			.addText((text) =>
-				text
-					.setPlaceholder("100")
-					.setValue(this.plugin.settings.titleMaxLength.toString())
-					.onChange(async (value) => {
-						const numValue = parseInt(value);
-						if (!isNaN(numValue) && numValue > 0) {
-							this.plugin.settings.titleMaxLength = numValue;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
-
 		// Advanced Settings
-		containerEl.createEl("h3", { text: "Advanced Settings" });
+		new Setting(containerEl).setName("Advanced Settings").setHeading();
 
 		new Setting(containerEl)
 			.setName("Custom tracking parameters")
@@ -156,8 +126,22 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 					})
 			);
 
+			new Setting(containerEl)
+			.setName("Auto-format URLs")
+			.setDesc(
+				'Comma-separated list of domains to auto-format as Markdown links (e.g., "youtube.com,amazon."). Other domains will only have trackers stripped.'
+			)
+			.addTextArea((text) =>
+				text
+					.setPlaceholder("youtube.com, youtu.be, amazon., x.com")
+					.setValue(this.plugin.settings.autoFormatDomains)
+					.onChange(async (value) => {
+						this.plugin.settings.autoFormatDomains = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
 		// Plugin Info
-		containerEl.createEl("hr");
 		containerEl
 			.createEl("div", {
 				cls: "setting-item",

@@ -14,8 +14,20 @@ export const AllPlatformRules = [
 		extractKey: (url: URL): string | null => {
 			return url.searchParams.get("v");
 		},
-		buildUrl: (key: string): string => {
-			return `https://youtu.be/${key}`;
+		buildUrl: (key: string, originalUrl: URL): string => {
+			const baseUrl = `https://youtu.be/${key}`;
+			if (!originalUrl) {
+				return baseUrl;
+			}
+
+			const newUrl = new URL(baseUrl);
+			originalUrl.searchParams.forEach((value, name) => {
+				if (name !== "v") {
+					newUrl.searchParams.set(name, value);
+				}
+			});
+
+			return newUrl.toString();
 		},
 	},
 	{

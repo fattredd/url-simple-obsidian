@@ -1,4 +1,4 @@
-export let tracking_parameters: string[] = [
+export const tracking_parameters: string[] = [
 	"utm_source",
 	"utm_medium",
 	"utm_campaign",
@@ -25,7 +25,7 @@ export let tracking_parameters: string[] = [
 	"ncid",
 ];
 
-export let essential_parameters: string[] = [
+export const essential_parameters: string[] = [
 	"v",
 	"t",
 	"list",

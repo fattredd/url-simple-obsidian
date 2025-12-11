@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "url-simple-obsidian",
+	"name": "Simple URL Cleaner",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Automatically cleans trackers, shortens known URLs, and fetches titles on paste.",
+	"author": "JButler",
+	"authorUrl": "https://github.com/fattredd",
+	"fundingUrl": "https://github.com/fattredd",
 	"isDesktopOnly": false
 }

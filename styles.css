@@ -1,8 +1,31 @@
-/*
+/* Smart URL Cleaner - Status Notifications */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.smart-url-cleaner-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
-If your plugin does not need CSS, delete this file.
+.smart-url-cleaner-status.visible {
+    opacity: 1;
+}
 
-*/
+.smart-url-cleaner-status.success {
+    border-left: 4px solid var(--color-green);
+}
+
+.smart-url-cleaner-status.error {
+    border-left: 4px solid var(--color-red);
+}
+
+.smart-url-cleaner-status.processing {
+    border-left: 4px solid var(--color-blue);
+}

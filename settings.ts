@@ -148,7 +148,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 				attr: { style: "padding: 20px 0; color: var(--text-muted);" },
 			})
 			.createEl("small", {
-				text: "Smart URL Cleaner v1.0.0 • Automatically cleans, shortens, and titles URLs",
+				text: "Smart URL Cleaner v1.0.1 • Automatically cleans, shortens, and titles URLs",
 			});
 	}
 }

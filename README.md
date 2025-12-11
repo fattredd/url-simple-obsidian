@@ -1,6 +1,4 @@
-# Obsidian Sample Plugin
-
-# Smart URL Cleaner for Obsidian
+# Simple URL Cleaner for Obsidian
 
 An Obsidian plugin that automatically processes URLs when pasted into your notes.
 It cleans tracking parameters, shortens links from supported platforms, and can
@@ -25,10 +23,10 @@ becomes
 ## Installation
 
 ### Manual Installation
-- Clone this repository to your Obsidian plugins folder:- .obsidian/plugins/smart-url-cleaner
+- Clone this repository to your Obsidian plugins folder:- .obsidian/plugins/simple-url-cleaner
 - Install dependencies: npm install
 - Build the plugin: npm run build
-- Enable "Smart URL Cleaner" in Obsidian's Community Plugins settings.
+- Enable "simple URL Cleaner" in Obsidian's Community Plugins settings.
 
 ## Usage
 
@@ -51,7 +49,7 @@ Configure these in Obsidian's keyboard shortcut settings:
 When text is selected, pasting a URL will replace the selection with the processed result.
 Configuration
 
-Access settings via Obsidian Settings -> Community plugins -> Smart URL Cleaner.
+Access settings via Obsidian Settings -> Community plugins -> simple URL Cleaner.
 
 ## Core Settings:
 - Enable/disable automatic processing on paste

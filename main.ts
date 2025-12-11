@@ -70,7 +70,7 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		// Register a command for manual processing
 		this.addCommand({
 			id: "process-selected-url",
-			name: "Process selected URL",
+			name: "Process selected url",
 			editorCallback: async (editor: Editor) => {
 				await this.processSelectedText(editor);
 			},
@@ -149,11 +149,7 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 				line: cursor.line,
 				ch: cursor.ch + result.markdownOutput.length,
 			});
-		} catch {
-			// eslint-disable-next-line no-empty
-			// Added this directive because we want to fail parsing gracefully.
-			// Not everything is a URL
-		}
+		} catch {}
 	}
 
 	private async processSelectedText(editor: Editor): Promise<void> {
@@ -162,18 +158,18 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 
 		const trimmedText = selection.trim();
 		if (!this.isValidUrl(trimmedText)) {
-			new Notice("Selected text is not a valid URL");
+			new Notice("Selected text is not a valid url");
 			return;
 		}
 
 		try {
 			new Notice("Processing URL...");
-			const result = await this.urlProcessor.processUrl(trimmedText);
+			const result = this.urlProcessor.processUrl(trimmedText);
 			editor.replaceSelection(result.finalUrl);
-			new Notice("URL processed successfully!");
+			new Notice("Url processed successfully!");
 		} catch (error) {
 			console.error("Processing failed:", error);
-			new Notice("Failed to process URL");
+			new Notice("Failed to process url");
 		}
 	}
 
@@ -181,7 +177,7 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		try {
 			const url = new URL(string);
 			return url.protocol === "http:" || url.protocol === "https:";
-		} catch (_) {
+		} catch {
 			return false;
 		}
 	}

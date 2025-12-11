@@ -3,7 +3,7 @@
 	"name": "Simple URL Cleaner",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Automatically cleans trackers, shortens known URLs, and fetches titles on paste.",
+	"description": "Automatically cleans trackers, shortens known urls, and formats on paste.",
 	"author": "JButler",
 	"authorUrl": "https://github.com/fattredd",
 	"fundingUrl": "https://github.com/fattredd",

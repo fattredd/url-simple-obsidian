@@ -1,7 +1,7 @@
 {
 	"name": "url-simple",
 	"version": "1.0.0",
-	"description": "Automatically cleans trackers, shortens known URLs, and fetches titles on paste",
+	"description": "Automatically cleans trackers, shortens known urls, and fetches titles on paste",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

@@ -1,6 +1,6 @@
 # Simple URL Cleaner for Obsidian
 
-An Obsidian plugin that automatically processes URLs when pasted into your notes.
+An Obsidian plugin that automatically processes urls when pasted into your notes.
 It cleans tracking parameters, shortens links from supported platforms, and can
 fetch page titles to create Markdown links - all configurable to your workflow.
 
@@ -12,7 +12,7 @@ becomes
 
 - Automatic Processing: Intercepts URL pastes in the editor for immediate cleanup.
 - Tracker Stripping: Removes UTM parameters, click IDs (fbclid, gclid), and other common tracking data.
-- Platform Shortening: Converts supported URLs to their clean, short forms:
+- Platform Shortening: Converts supported urls to their clean, short forms:
   - YouTube: youtube.com/watch?v=... -> youtu.be/...
   - Amazon: amazon.com/gp/product/... -> amzn.com/gp/...
   - Twitter/X: twitter.com/... -> x.com/...
@@ -63,7 +63,7 @@ Access settings via Obsidian Settings -> Community plugins -> simple URL Cleaner
 ## How It Works
 
 The plugin uses a rules-based system:
-- Detection: Identifies URLs from supported platforms using hostname and path patterns.
+- Detection: Identifies urls from supported platforms using hostname and path patterns.
 - Cleaning: Filters out known tracking parameters while preserving essential ones (like v for YouTube).
-- Shortening: Reconstructs URLs using platform-specific short domains.
+- Shortening: Reconstructs urls using platform-specific short domains.
 - Formatting: Fetches page titles (if enabled) and creates Markdown links only for specified domains.

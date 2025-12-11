@@ -43,7 +43,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Enable shortening for all pastes")
-			.setDesc("Automatically shorten URLs when pasted into editor")
+			.setDesc("Automatically shorten urls when pasted into editor")
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.enableShorteningAllPastes)
@@ -56,7 +56,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Enable tracker stripping for all pastes")
 			.setDesc(
-				"Automatically strip tracking from URLs when pasted into editor"
+				"Automatically strip tracking from urls when pasted into editor"
 			)
 			.addToggle((toggle) =>
 				toggle
@@ -72,7 +72,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Enable formatting for all pastes")
-			.setDesc("Automatically format select URLs when pasted into editor")
+			.setDesc("Automatically format select urls when pasted into editor")
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.enableFormattingAllPastes)
@@ -85,7 +85,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Command").setHeading();
 
 		new Setting(containerEl)
-			.setName("Shorten known URLs")
+			.setName("Shorten known urls")
 			.setDesc("Convert YouTube, Amazon, etc. to their short forms")
 			.addToggle((toggle) =>
 				toggle
@@ -127,9 +127,9 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 			);
 
 			new Setting(containerEl)
-			.setName("Auto-format URLs")
+			.setName("Auto-format urls")
 			.setDesc(
-				'Comma-separated list of domains to auto-format as Markdown links (e.g., "youtube.com,amazon."). Other domains will only have trackers stripped.'
+				'Comma-separated list of domains to auto-format as markdown links (e.g., "youtube.com,amazon."). Other domains will only have trackers stripped.'
 			)
 			.addTextArea((text) =>
 				text
@@ -148,7 +148,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 				attr: { style: "padding: 20px 0; color: var(--text-muted);" },
 			})
 			.createEl("small", {
-				text: "Simple URL Cleaner v1.0.0 • Automatically cleans, shortens, and titles URLs",
+				text: "Simple url cleaner v1.0.0 - automatically clean, shorten, and format urls",
 			});
 	}
 }

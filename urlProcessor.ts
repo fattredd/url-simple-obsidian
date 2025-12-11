@@ -95,14 +95,14 @@ export class UrlProcessor {
 		);
 	}
 
-	async processUrl(
+	processUrl(
 		originalUrl: string,
 		commandOverrides?: {
 			skipShortening: boolean;
 			skipTracking: boolean;
 			skipFormatting: boolean;
 		}
-	): Promise<UrlProcessingResult> {
+	): UrlProcessingResult {
 		const shortenUrls = commandOverrides?.skipShortening
 			? false
 			: this.deps.settings.shortenUrls;
@@ -113,7 +113,7 @@ export class UrlProcessor {
 			? false
 			: this.deps.settings.autoFormat;
 
-		const processingPromise = (async (): Promise<UrlProcessingResult> => {
+		const processingPromise = ((): UrlProcessingResult => {
 			try {
 				const url = new URL(originalUrl);
 
@@ -153,9 +153,7 @@ export class UrlProcessor {
 				// Step 2: Apply shortening (if needed)
 				let finalUrl = cleanedUrl;
 				if (needsShortening) {
-					finalUrl = this.applyShorteningRules(
-						new URL(cleanedUrl)
-					);
+					finalUrl = this.applyShorteningRules(new URL(cleanedUrl));
 				}
 
 				// Step 3: Fetch title and format (if needed)

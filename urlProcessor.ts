@@ -153,7 +153,7 @@ export class UrlProcessor {
 				// Step 2: Apply shortening (if needed)
 				let finalUrl = cleanedUrl;
 				if (needsShortening) {
-					finalUrl = await this.applyShorteningRules(
+					finalUrl = this.applyShorteningRules(
 						new URL(cleanedUrl)
 					);
 				}
@@ -163,7 +163,7 @@ export class UrlProcessor {
 				let markdownOutput = finalUrl;
 
 				if (needsAutoFormat) {
-					const titleResult = await this.fetchPageTitle(finalUrl);
+					const titleResult = this.fetchPageTitle(finalUrl);
 					title = titleResult.title;
 
 					let linkText = title;
@@ -235,7 +235,7 @@ export class UrlProcessor {
 		return newUrl.toString();
 	}
 
-	async applyShorteningRules(url: URL): Promise<string> {
+	applyShorteningRules(url: URL): string {
 		const hostname = url.hostname;
 		const pathname = url.pathname;
 
@@ -269,7 +269,7 @@ export class UrlProcessor {
 		return url.toString();
 	}
 
-	async fetchPageTitle(url: string): Promise<TitleFetchResult> {
+	fetchPageTitle(url: string): TitleFetchResult {
 		// Don't fetch titles for local files or if disabled
 		if (url.startsWith("file://") || !this.deps.settings.autoFormat) {
 			return { title: "", success: false, source: "failed" };

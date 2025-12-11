@@ -44,8 +44,7 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		// Register a command for pasting with processing
 		this.addCommand({
 			id: "paste-and-process-url",
-			name: "Paste and Process URL from Clipboard",
-			hotkeys: [{ modifiers: ["Mod", "Shift"], key: "v" }],
+			name: "Paste and process URL from clipboard",
 			editorCallback: async (editor: Editor) => {
 				await this.handleCommandPaste(editor, {
 					skipShortening: false,
@@ -58,7 +57,7 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 		// Register a command for pasting without processing
 		this.addCommand({
 			id: "paste-raw-url",
-			name: "Paste and URL from Clipboard without Processing",
+			name: "Paste URL from clipboard without processing",
 			editorCallback: async (editor: Editor) => {
 				await this.handleCommandPaste(editor, {
 					skipShortening: true,
@@ -76,9 +75,6 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 				await this.processSelectedText(editor);
 			},
 		});
-
-		// Show notice that plugin is loaded
-		new Notice("Smart URL Cleaner loaded!");
 	}
 
 	private async handlePasteEvent(
@@ -155,6 +151,8 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 			});
 		} catch {
 			// eslint-disable-next-line no-empty
+			// Added this directive because we want to fail parsing gracefully.
+			// Not everything is a URL
 		}
 	}
 
@@ -198,9 +196,5 @@ export default class SmartUrlCleanerPlugin extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
-	}
-
-	onunload(): void {
-		console.log("Unloading Smart URL Cleaner");
 	}
 }

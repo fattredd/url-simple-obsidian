@@ -1,6 +1,9 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import tsparser from "@typescript-eslint/parser";
+import { defineConfig } from "@eslint/config-helpers";
+import obsidianmd from "eslint-plugin-obsidianmd";
 
 const banner =
 `/*
@@ -47,3 +50,14 @@ if (prod) {
 } else {
 	await context.watch();
 }
+
+export default defineConfig([
+  ...obsidianmd.configs.recommended,
+  {
+    files: ["**/*.ts"],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: { project: "./tsconfig.json" },
+    },
+  },
+]);

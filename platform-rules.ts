@@ -66,7 +66,7 @@ export const AllPlatformRules = [
 	{
 		name: "Reddit",
 		matchHost: /(?:www\.)?reddit\.com$/,
-		matchPath: /^\/r\/[^\/]+\/comments\/[^\/]+/,
+		matchPath: /^\/r\/[^/]+\/comments\/[^/]+/,
 		extractKey: (
 			url: URL,
 			match?: RegExpMatchArray | null

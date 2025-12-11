@@ -37,9 +37,9 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		new Setting(containerEl).setName("Smart URL cleaner settings").setHeading();
+		new Setting(containerEl).setName("Smart URL cleaner").setHeading();
 
-		new Setting(containerEl).setName("Default paste override options").setHeading();
+		new Setting(containerEl).setName("Default paste override").setHeading();
 
 		new Setting(containerEl)
 			.setName("Enable shortening for all pastes")
@@ -82,7 +82,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl).setName("Command options").setHeading();
+		new Setting(containerEl).setName("Command").setHeading();
 
 		new Setting(containerEl)
 			.setName("Shorten known URLs")
@@ -111,7 +111,7 @@ export class SmartUrlCleanerSettingTab extends PluginSettingTab {
 			);
 
 		// Advanced Settings
-		new Setting(containerEl).setName("Advanced settings").setHeading();
+		new Setting(containerEl).setName("Advanced").setHeading();
 
 		new Setting(containerEl)
 			.setName("Custom tracking parameters")
